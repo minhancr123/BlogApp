@@ -4,7 +4,7 @@
     import { cookies } from "next/headers";
     export const logout = async () => {
         const {session} = await validateRequest() ;
-
+        console.log(session);    
         if(!session?.id){
             throw new Error('Unauthorized');
         }

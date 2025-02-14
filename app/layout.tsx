@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { ReactNode } from "react";
 import "./globals.css"
 import { ThemeProvider } from "next-themes";
+import { ReactQueryProvider } from "./QueryClientProvider";
 export const metadata: Metadata = {
     title: {
         template: "%s | AnBlog",
@@ -15,7 +16,7 @@ interface RootLayoutProps {
     children: ReactNode;
 }
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({children} : RootLayoutProps) {
     return (
         
         <html lang="en">
@@ -31,8 +32,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
                     enableSystem
 
                 >
+                    <ReactQueryProvider >
+                        {children}
+
+                    </ReactQueryProvider>
                     
-                    {children}
                 </ThemeProvider>
             </body>
         </html>

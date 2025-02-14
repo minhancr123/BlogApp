@@ -8,7 +8,17 @@ import MenuBar from "./MenuBar";
 import Avartar from "./UserAvartarProps";
 import PostEditor from "./TapEditor";
 import { Button } from "@/components/ui/button";
-export default async function  Home (){
+import { prisma } from "../lib/prisma";
+import { Posts } from "./Post";
+import { Post_type } from "../lib/post_typeprops";
+import Link from "next/link";
+import { Label } from "@/components/ui/label";
+import TrendSideBar from "@/components/TrendSideBar";
+export default async function Home  (){
+    const PostValid = await prisma.post.findMany({
+        include: Post_type,
+    }
+)
     const result = await validateRequest();
     console.log(result);
     if(!result.user){
@@ -16,12 +26,14 @@ export default async function  Home (){
     }
     return (
         <div className="h-[50vh] w-full ">
-            <div className="rounded-lg flex items-center">
-                <Avartar size={40} alt="" url={null}>
+            <div className="rounded-lg flex items-center gap-2">
+                <Avartar size={40} alt="" url={null} className="self-start">
                 </Avartar>
                 <PostEditor></PostEditor>
-                
             </div>
+                   
+                <Posts post={PostValid}></Posts>
+          
         </div>
     )
        

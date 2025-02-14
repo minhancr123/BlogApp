@@ -10,39 +10,40 @@ import { redirect } from "next/navigation"
 
 export const signup = async(creadentials : requiredSignUp): Promise<{error:string | boolean}>=>{
     try{
-        
         const {username , password, email} = Signup.parse(creadentials);
-        
-        const existingusername = await prisma.user.findFirst({
+        const existingUser  = await prisma.user.findFirst({
             where : {
-                username: {
-                    equals : username ,
-                    mode: "insensitive"
+                OR:[{
+                    username: {
+                        equals : username ,
+                        mode: "insensitive"
+                    }
+                },
+                {
+                    email : {
+                        equals : email,
+                        mode: "insensitive"
+                    } 
+
                 }
+            ]
             }
         })
     
-        if(existingusername){
-            return {
-                error: "Username is existed", 
-    
+        if(existingUser ){
+            if(existingUser.username == username){
+                return {
+                    error: "Username is existed", 
+                }
+            }
+            else{
+                return {
+                    error : "Email is already taken"
+                }
             }
         }
     
-        const existingemail = await prisma.user.findFirst({
-            where : {
-                email : {
-                    equals : email,
-                    mode: "insensitive"
-                } 
-            }
-        });
-    
-        if(existingemail){
-            return {
-                error : "Email is already taken"
-            }
-        }
+      
         const userId = generateIdFromEntropySize(10);
         await prisma.user.create({
             data:{

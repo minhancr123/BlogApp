@@ -28,10 +28,10 @@ model Session {
 }
 
 model Post{
-  id String @id @default(uuid())
+  id String @id @default(cuid())
   content String
   userId String
+  createdAt DateTime @default(now())
   user User @relation(fields: [userId] , references: [id] , onDelete: Cascade)
-
-
 }
+
