@@ -5,6 +5,7 @@ import SessionProvider from "./SessionProvider";
 import NavBar from "./NavBar";
 import MenuBar from "./MenuBar";
 import TrendSideBar from "@/components/TrendSideBar";
+import { ToastContainer } from "react-toastify";
 export default async function  Layout ({children} : {children : React.ReactNode}){
     const result = await validateRequest();
     if(!result.user){
@@ -19,6 +20,18 @@ export default async function  Layout ({children} : {children : React.ReactNode}
               <TrendSideBar></TrendSideBar>
             </div>
         </div>
+        <ToastContainer
+        position= "top-right"
+        autoClose={5000}
+        hideProgressBar= {false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        >
+        </ToastContainer>
         </SessionProvider>
 
 }

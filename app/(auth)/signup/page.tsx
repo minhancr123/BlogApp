@@ -15,7 +15,7 @@
             <div className="min-h-screen flex justify-center items-center ">
                 <div className="flex rounded-2xl max-w-3xl min-w-[50rem] gap-2">
                     <div className="bg-card min-w-[10rem] overflow-hidden">
-                        <h1 className="text-center font-bold">Login</h1>
+                        <h1 className="text-center font-bold">Hello , Welcome to AnHuynh's Blog</h1>
                         <div className="flex flex-col items-center">
                             Sign Up Form
                         </div>

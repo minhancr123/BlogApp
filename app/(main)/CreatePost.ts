@@ -11,7 +11,7 @@ export const createPost = async (data : Post) : Promise<{result :  unknown}> => 
         const data1 =await prisma.post.create({
             data: {
                 content : data.content,
-                userId : "5d3zulvcu3f7ujer",
+                userId :  data.userId,
             }
         });
 

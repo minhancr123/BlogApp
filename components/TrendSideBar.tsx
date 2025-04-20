@@ -10,6 +10,9 @@ import { Button } from './ui/button';
 import { Loader2 } from 'lucide-react';
 import { unstable_cache } from 'next/cache';
 import {FormatNumber} from "../lib/utils"
+import axios from 'axios';
+import { FollowingButton } from './FollowingButton';
+import { FollowingInfo } from '@/app/lib/post_typeprops';
 interface SimpleUser {
     id: string;
     username: string;
@@ -42,12 +45,17 @@ export default async function TrendSideBar() {
 }
 
 const WhoToFollow: React.FC<WhoToFollowProps> = ({ followers }) => {
+    const followUser = async (id : string) => {
+        const result = await axios.post(`/users/follower/${id}`);
+
+        console.log(result);
+    }
     return (
         <Suspense fallback={<Loader2 className='animate-spin size-3' />}>
-            <div className='text-xl text-center pt-2'>
+            <div className='text-xl text-center pt-2 h-[400px]'>
                 <h2>Who to follow</h2>
                 {followers.map((user, index) => (
-                    <div key={index} className='flex gap-8 items-center justify-center'>
+                    <div key={index} className='flex gap-8 text-sm items-center justify-between w-full'>
                         <Link href={`/user/${user.username}`} className='flex items-center gap-2'>
                             <Avartar url={user.profileImage || undefined} alt={user.username} />
                             <div>
@@ -55,7 +63,7 @@ const WhoToFollow: React.FC<WhoToFollowProps> = ({ followers }) => {
                                 <p>@{user.username}</p>
                             </div>
                         </Link>
-                        <Button className='bg-destructive'>Follow</Button>
+                        <FollowingButton id={user.id} initialData={{followers : 0 , isfollowbyUser :false}} ></FollowingButton>
                     </div>
                 ))}
             </div>
@@ -84,7 +92,7 @@ const TrendingTop = async () => {
     console.log(TT);
     return (
         <div className='space-y-2 text-sm shadow-sm bg-red-50'>
-            <h2>Trending Top</h2>
+            <h2 className='text-center'>Trending Top</h2>
             {TT.map((value, index) => (
                 <div key={index}>
                     <p>{value.hashtag} ({FormatNumber(value.count)})</p>

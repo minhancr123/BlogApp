@@ -2,7 +2,7 @@ import React from 'react'
 
 export const LoadingSkeleton = () => {
   return (
-    <div className="bg-red-50 w-[420px] h-[90px] flex flex-col">
+    <div className="bg-red-50 w-full h-[90px] flex flex-col">
         <Skeleton></Skeleton>
         <Skeleton></Skeleton>
         <Skeleton></Skeleton>

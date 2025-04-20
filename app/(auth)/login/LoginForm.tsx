@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Input } from "@/components/ui/input";
 import LoadingButton from "@/components/LoadingButton";
 import PasswordInput from "@/components/passwordinput";
+import Link from "next/link";
 
 export default function LoginForm() {
     const router = useRouter();
@@ -79,6 +80,7 @@ export default function LoginForm() {
             >
                 Login
             </LoadingButton>
+            <div className="flex gap-2">Don't have an account? <Link href="/signup" className="hover:underline">Register</Link></div>
         </form>
     );
 }

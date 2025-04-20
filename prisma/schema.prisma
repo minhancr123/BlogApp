@@ -18,6 +18,9 @@ model User {
   createdAt   DateTime  @default(now())
   session     Session[]
   Post Post[]
+  Followings Follow[] @relation("UserAsFollowing") // Những người mình follow
+Followers Follow[] @relation("UserAsFollower")   // Những người follow mình
+
 }
 
 model Session {
@@ -35,3 +38,11 @@ model Post{
   user User @relation(fields: [userId] , references: [id] , onDelete: Cascade)
 }
 
+model Follow {
+  followerId  String 
+  follower    User @relation("UserAsFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+ following   User @relation("UserAsFollower", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+}
