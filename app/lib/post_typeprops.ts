@@ -1,12 +1,26 @@
 import { PrismaAdapter } from "@lucia-auth/adapter-prisma"
-import { Prisma } from "@prisma/client"
+import { Prisma, User } from "@prisma/client"
 
 export const SelectUser = {
         username : true,
         id : true,
-        displayname : true
+        displayname : true,
 }satisfies Prisma.UserSelect
 
+export const DataUserSelect = (LoggedUserId: string): Prisma.UserSelect => ({
+    username: true,
+    id: true,
+    displayname: true,
+    avatarUrl : true,
+    Followers: {
+        select: {
+            followerId: true
+        },
+        where: {
+            followerId: LoggedUserId
+        }
+    },
+});
 export const  Post_type = {
     user:{
       select : SelectUser
@@ -25,4 +39,10 @@ export interface PostPage {
 export interface FollowingInfo {
    followers : number | undefined , 
    isfollowbyUser : boolean
+}
+
+export interface UserData {
+    id : string,
+    displayname : string
+    username : string , 
 }

@@ -1,20 +1,29 @@
-import { number } from "zod"
 import Image, { StaticImageData } from "next/image";
-import { url } from "inspector";
-import ImagePlace from "../assets/avatar-placeholder.png"
+import ImagePlace from "../assets/avatar-placeholder.png";
 import { cn } from "@/lib/utils";
-interface AvartarProps {
-    url : string | undefined | null | StaticImageData;
-    size? : number; 
-    alt : string;
-    className? : string
+
+interface AvatarProps {
+  avatarUrl: string | StaticImageData | null | undefined;
+  size?: number;
+  alt: string;
+  className?: string;
 }
 
-export default function Avartar(Avartar : AvartarProps ){
-    return (
-        <Image  src={Avartar.url || ImagePlace} alt={Avartar.alt} width={Avartar.size || 48} height={Avartar.size || 48}
-        className={cn(Avartar.className , "rounded-full flex-none aspect-square bg-secondary h-fit object-cover border-0")}
-        >
-        </Image>
-    )
+export default function Avatar(props: AvatarProps) {
+  const { avatarUrl, size = 48, alt, className } = props;
+
+  const imageSource: string | StaticImageData =`/upload/${avatarUrl}`;
+    console.log(imageSource);
+  return (
+    <Image
+      src={imageSource}
+      alt={alt}
+      width={size}
+      height={size}
+      className={cn(
+        className,
+        "rounded-full flex-none aspect-square bg-secondary h-fit object-cover border-0"
+      )}
+    />
+  );
 }

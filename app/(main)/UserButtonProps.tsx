@@ -9,6 +9,7 @@ import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { logout } from "../(auth)/action";
 import { useState , useEffect } from "react";
+import { useRouter } from "next/navigation";
 interface UserProps {
     className? : string
 }
@@ -16,6 +17,7 @@ export default function UserButtonProps({className} : UserProps) {
     const {theme , setTheme}= useTheme();
     const [mounted , setmounted] = useState(false);
     const session = useSession();
+    const router = useRouter();
     useEffect(() => {
         setmounted(true);
     } , [])
@@ -25,12 +27,13 @@ export default function UserButtonProps({className} : UserProps) {
     // Provide default values to prevent hydration mismatch
     const displayName = session?.user?.displayname || 'User';
     const username = session?.user?.username || 'Anonymous';
+    const imageDisplay = session?.user.avatarURL || null;
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <button className={cn("flex-none rounded-full" , className)}>
                 <Avartar 
-                    url={null} 
+                    avatarUrl={imageDisplay} 
                     alt={displayName} 
                     size={40} 
                 />

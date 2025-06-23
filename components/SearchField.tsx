@@ -1,28 +1,42 @@
-"use client"
+"use client";
+
 import { SearchIcon } from "lucide-react";
 import { Input } from "./ui/input";
-import React, { EventHandler } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 
 export default function SearchField() {
-    const route = useRouter();
+  const router = useRouter();
 
-    function Search(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        const form = e.currentTarget;
-        const searchinput = form.q as HTMLInputElement;
-        if (!searchinput) return;
-        route.push(`/search?query=${encodeURIComponent(searchinput.value)}`);
-    }
+  function handleSearch(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const input = form.q as HTMLInputElement;
+    if (!input || !input.value.trim()) return;
 
-    return (
-        <form onSubmit={Search} className="flex items-center gap-2">
-            <div className="relative flex items-center">
-                <Input name="q" placeholder="Search Field" className="pe-10" />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2" type="submit">
-                    <SearchIcon className="size-5" />
-                </button>
-            </div>
-        </form>
-    );
+    const query = encodeURIComponent(input.value.trim());
+    router.push(`/search?query=${query}`);
+  }
+
+  return (
+    <form
+      onSubmit={handleSearch}
+      className="flex items-center w-full max-w-md"
+    >
+      <div className="relative flex w-full items-center">
+        <Input
+          name="q"
+          placeholder="Search..."
+          className="pr-10 placeholder:text-sm placeholder:text-gray-500 dark:placeholder:text-gray-400"
+        />
+        <button
+          type="submit"
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors duration-200"
+          aria-label="Search"
+        >
+          <SearchIcon className="size-5" />
+        </button>
+      </div>
+    </form>
+  );
 }

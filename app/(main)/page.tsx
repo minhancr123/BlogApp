@@ -27,7 +27,7 @@ export default async function Home  (){
     return (
         <div className="h-[50vh] w-full ">
             <div className="rounded-lg flex items-center gap-2">
-                <Avartar size={40} alt="" url={null} className="self-start">
+                <Avartar size={40} alt="" avatarUrl={result.user.avatarURL || null} className="self-start">
                 </Avartar>
                 <PostEditor></PostEditor>
             </div>

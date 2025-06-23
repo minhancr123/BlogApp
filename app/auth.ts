@@ -22,7 +22,7 @@ export const lucia = new Lucia(adapter ,{
                 id : databaseUserAttributes.id,
                 username : databaseUserAttributes.username,
                 displayname: databaseUserAttributes.displayname,
-                avatarURL : databaseUserAttributes.avatarURL,
+                avatarURL : databaseUserAttributes.avatarUrl,
                 googleId : databaseUserAttributes.googleId
             }
         },
@@ -39,11 +39,11 @@ interface DatabaseUserAttributes{
     id : string;
     username : string;
     displayname : string;
-    avatarURL : string | null;
+    avatarUrl : string | null;
     googleId : string;
 }
 
-export const validateRequest = cache(
+export const validateRequest =
     async() : Promise<{user: User , session : Session} | {user : null , session: null}> => {
         const sessionID = (await cookies()).get(lucia.sessionCookieName)?.value ?? null;
         if(!sessionID){
@@ -80,4 +80,4 @@ export const validateRequest = cache(
         return result
 
     }
-)
+ 

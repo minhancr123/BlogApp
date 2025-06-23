@@ -1,10 +1,10 @@
 "use client";
 import { Label } from "@/components/ui/label";
-import { Postdata } from "../lib/post_typeprops";
+import { FollowingInfo, Postdata, UserData } from "../lib/post_typeprops";
 import Link from "next/link";
 import Avartar from "./UserAvartarProps";
 import { FormatDateTime } from "@/lib/utils";
-import { InfiniteData, QueryClient, QueryFilters, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { InfiniteData, QueryClient, QueryFilters, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PostPage } from "../lib/post_typeprops";
 import { axios } from "../api/axiosInstance";
 import { Loader2 } from "lucide-react";
@@ -14,14 +14,21 @@ import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { useEffect, useState } from "react";
 import { Dialog ,  DialogContent, DialogTrigger , DialogDescription, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { toast } from "react-toastify";
+import { TimeAgo } from "./TimeAgo";
+import LinkiFy from "@/components/ui/LinktiFy";
+import { UserTooltip } from "@/components/ui/UserTooltip";
+import { useSession } from "./SessionProvider";
 
 interface PostProps {
   post: Array<Postdata>;
 }
 
 export const Posts = ({ post }: PostProps) => {
+  const session = useSession();
+  const user = session?.user;
   const queryClient = useQueryClient();
   const [firstload, setfirstload] = useState(true);
+  const [activetab, setactivetab] = useState<"foryou" | "folowing">("foryou");
   const Mutation = useMutation({
     mutationFn : async (id : String) => {
       const result = await axios.delete(`/posts/for-you/${id}`);
@@ -50,16 +57,8 @@ export const Posts = ({ post }: PostProps) => {
       queryClient.invalidateQueries({ queryKey: ["todo-post", "post-for-you"] });
     }
   }) 
-  const {
-    data,
-    error,
-    hasPreviousPage,
-    hasNextPage,
-    isFetchingNextPage,
-    status,
-    fetchNextPage,
-  } = useInfiniteQuery<PostPage>({
-    queryKey: ["todo-post", "post-for-you"],
+  const foryouquery = useInfiniteQuery<PostPage>({
+    queryKey: ["todo-post", "post-for-you"], 
     queryFn: async ({ pageParam }) => {
       const res = await axios.get("/posts/for-you", {
         params: { cursor: pageParam },
@@ -70,6 +69,36 @@ export const Posts = ({ post }: PostProps) => {
     getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
   });
 
+  // const folowingquery  = useInfiniteQuery<FollowingInfo>({
+  //   queryKey: ["followingInfo", user?.id],
+  //   queryFn: async ({ pageParam = 0 }) => {
+  //     const res = await axios.get(`/users/follower/${user?.id}?page=${pageParam}`);
+  //     return res.data as FollowingInfo;
+  //   },
+  //   getNextPageParam: (lastPage) => lastPage.nextPage ?? undefined,
+  //   initialPageParam: 0,
+  //   enabled: !!user?.id,
+  // })
+
+  const folowingquery = useInfiniteQuery({
+    queryKey: ["empty"],
+    queryFn: async () => ({ posts: [], nextCursor: null }),
+    getNextPageParam: () => undefined,
+    initialPageParam: undefined,
+    enabled: false,
+  });
+  
+  const currentquery = activetab == "foryou" ? foryouquery : foryouquery;
+  const {
+    data,
+    error,
+    hasPreviousPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+    fetchNextPage,
+  } = currentquery;
+  
   if (status === "pending") {
     return firstload ? (
       <LoadingSkeleton></LoadingSkeleton>
@@ -87,8 +116,6 @@ export const Posts = ({ post }: PostProps) => {
    
     try {
       Mutation.mutate(id);
-       
-        
         
     } catch (error) {
        
@@ -96,62 +123,110 @@ export const Posts = ({ post }: PostProps) => {
 };
   return (
     <>
-      {posts.map((p) => (
-        <ScrollIfnitiveComponent
-          key={p.id}
-          onBottomView={() => {
-            fetchNextPage();
-          }}
+  {/* Tabs */}
+  <div className="flex text-black gap-2 w-full max-w-xl mx-auto mt-4">
+    {["foryou", "folowing"].map((tab) => (
+      <div
+        key={tab}
+        className={`flex-1 rounded-lg border transition-all duration-200 text-center cursor-pointer ${
+          activetab === tab
+            ? "bg-gradient-to-r from-indigo-400 to-purple-500 text-white border-indigo-600 shadow-md"
+            : "bg-white text-black border-gray-300 hover:bg-gray-100"
+        }`}
+      >
+        <button
+          className="w-full py-3 font-medium"
+          onClick={() => setactivetab(tab)}
         >
-          {
-            <div className="mt-3 flex flex-col gap-3 bg-red-50 p-5 border-2 border-gray-200 rounded-sm">
-              <div className="flex items-start justify-between">
-                <div className = "flex items-center">
-                  <Link href="">
-                    <Avartar url="" alt="" />
-                  </Link>
+          {tab === "foryou" ? "✨ For You" : "👥 Following"}
+        </button>
+      </div>
+    ))}
+  </div>
 
-                  <div className="flex gap-2 items-center">
-                    <Label className="block text-xl font-bold">{p.user.username}:</Label>
-                    <p className="block text-sm">
-                      Posted {FormatDateTime(p.createdAt)}
-                    </p>
-                  </div>
-                </div>  
-                <div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                      <button>Delete</button>
-                  </DialogTrigger>
-
-                  <DialogContent>
-                      <DialogHeader>
-                          <DialogTitle>Xóa bài viết</DialogTitle>
-                          <DialogDescription>Bạn có chắc chắn muốn xóa bài viết này không?</DialogDescription>
-                      </DialogHeader>
-
-                      <div className="flex gap-4">
-                      <DialogClose asChild>
-                        <button onClick={() => deletePost(p.id)}>Yes</button>
-                      </DialogClose>
-                            <DialogClose asChild>
-                              <span className="cursor-pointer">No</span> 
-                          </DialogClose>
-                      </div>
-                  </DialogContent>
-              </Dialog>
-
-                </div>
+  {/* Posts */}
+  {activetab === "foryou" &&
+    posts.map((p) => (
+      <ScrollIfnitiveComponent key={p.id} onBottomView={fetchNextPage}>
+        <div className="mt-6 w-full max-w-xl mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-5 shadow-sm transition-all hover:shadow-md">
+          {/* Post header */}
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex gap-3 items-center">
+              <UserTooltip user={user as UserData}>
+                <Link href={`/user/${p.user.username}`}>
+                  <Avartar
+                    avatarUrl={user?.avatarURL}
+                    alt={p.user.username}
+                    className="w-10 h-10 border border-gray-300 rounded-full"
+                  />
+                </Link>
+              </UserTooltip>
+              <div>
+                <p className="font-semibold text-lg text-gray-900 dark:text-white">
+                  {p.user.username}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Posted <TimeAgo timestamp={p.createdAt} />
+                </p>
               </div>
-              <div className="whitespace-pre-line break-words">{p.content}</div>
             </div>
-          }
-        </ScrollIfnitiveComponent>
-      ))}
-      {/* <Button onClick={() => hasNextPage && fetchNextPage()} disabled={!hasNextPage || isFetchingNextPage}>
-        {isFetchingNextPage ? "Loading..." : hasNextPage ? "Load More" : "No More Posts"}
-      </Button> */}
-      {isFetchingNextPage && <Loader2 className="animate-spin"></Loader2>}
-    </>
+
+            {/* Delete button */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="text-sm text-red-600 hover:underline">
+                  Delete
+                </button>
+              </DialogTrigger>
+
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Xóa bài viết</DialogTitle>
+                  <DialogDescription>
+                    Bạn có chắc chắn muốn xóa bài viết này không?
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex gap-4 justify-end mt-4">
+                  <DialogClose asChild>
+                    <button
+                      onClick={() => deletePost(p.id)}
+                      className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                    >
+                      Yes
+                    </button>
+                  </DialogClose>
+                  <DialogClose asChild>
+                    <button className="px-4 py-2 border rounded hover:bg-gray-100 transition">
+                      No
+                    </button>
+                  </DialogClose>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Post content */}
+          <LinkiFy>
+            <div className="ml-12 whitespace-pre-line text-gray-800 dark:text-gray-200">
+              {p.content}
+            </div>
+          </LinkiFy>
+        </div>
+      </ScrollIfnitiveComponent>
+    ))}
+
+  {/* Following tab */}
+  {activetab === "folowing" && (
+    <div className="text-center mt-10 text-gray-500">Coming soon...</div>
+  )}
+
+  {/* Loading spinner */}
+  {isFetchingNextPage && (
+    <div className="flex justify-center my-4">
+      <Loader2 className="animate-spin text-blue-500 size-6" />
+    </div>
+  )}
+</>
+
   );
 };

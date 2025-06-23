@@ -44,6 +44,15 @@ export const SignUpForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
+      <FormField control={control} name="email" render={({ field }) => (
+        <FormItem>
+          <FormLabel>Email</FormLabel>
+          <FormControl>
+            <Input placeholder="Email" {...register("email")} />
+          </FormControl>
+          <FormMessage>{errors.email?.message}</FormMessage>
+        </FormItem>
+      )} />
       <FormField control={control} name="username" render={({ field }) => (
         <FormItem>
           <FormLabel>Username</FormLabel>
@@ -63,15 +72,7 @@ export const SignUpForm = () => {
           <FormMessage>{errors.password?.message}</FormMessage>
         </FormItem>
       )} />
-    <FormField control={control} name="email" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Email</FormLabel>
-          <FormControl>
-            <Input placeholder="Email" {...register("email")} />
-          </FormControl>
-          <FormMessage>{errors.email?.message}</FormMessage>
-        </FormItem>
-      )} />
+    
       {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
       <LoadingButton loading={isPending} type="submit" className="w-full">

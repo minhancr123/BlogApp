@@ -1,12 +1,17 @@
-'use server'
-import {prisma} from "@/app/lib/prisma";
-import { login, requiredLogin } from "@/app/lib/validation"
+'use server';
+
+import { prisma } from "@/app/lib/prisma";
+import { login, requiredLogin } from "@/app/lib/validation";
+// import bcrypt from "bcrypt";
+import { lucia } from "@/app/auth";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-export const Login = async (credentials: requiredLogin): Promise<{error: string | boolean}> => {
+
+export const Login = async (credentials: requiredLogin): Promise<{ error: string | boolean }> => {
     try {
         const { username, password } = login.parse(credentials);
-        
-        const usernameexists = await prisma.user.findFirst({
+
+        const user = await prisma.user.findFirst({
             where: {
                 username: {
                     equals: username,
@@ -15,21 +20,32 @@ export const Login = async (credentials: requiredLogin): Promise<{error: string 
             }
         });
 
-        if (!usernameexists) {
-            return {
-                error: "Username not found"
-            }
+        if (!user || !user.passwordHash) {
+            return { error: "Username not found" };
         }
 
-        // Consider adding password verification
-        // const isPasswordValid = await bcrypt.compare(password, usernameexists.passwodHash);
+        // const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
         // if (!isPasswordValid) {
         //     return { error: "Invalid password" };
         // }
 
-       return {error : false};
+        const session = await lucia.createSession(user.id, {});
+        const sessionCookie = lucia.createSessionCookie(session.id);
+
+        const cookieStore = await cookies(); 
+
+        cookieStore.set(
+            sessionCookie.name,
+            sessionCookie.value,
+            sessionCookie.attributes
+        );
+        
+        return {error : false};
+
     } catch (error) {
         console.error("Login error:", error);
-        return { error: error instanceof Error ? error.message : "Something went wrong" };
+        return {
+            error: error instanceof Error ? error.message : "Something went wrong"
+        };
     }
-}
+};

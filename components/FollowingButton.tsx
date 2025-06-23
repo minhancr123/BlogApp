@@ -1,10 +1,11 @@
 "use client"
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { useFollowInfo } from "@/app/api/users/useFollowInfo";
 import { FollowingInfo } from "@/app/lib/post_typeprops";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSession } from "@/app/(main)/SessionProvider";
 
 interface FollowInfo {
     id: string;
@@ -13,8 +14,10 @@ interface FollowInfo {
 
 export const FollowingButton: React.FC<FollowInfo> = ({ id, initialData }) => {
     const queryClient = useQueryClient();
+    const [isfollow ,  ] = useState("Follow");
+    const session = useSession();
     const { data, isLoading } = useFollowInfo(id, initialData);
-
+    const currentuserid = session?.user.id;
     console.log(data);
     const handleFollow = async () => {
         try {
@@ -27,6 +30,9 @@ export const FollowingButton: React.FC<FollowInfo> = ({ id, initialData }) => {
         }
     };
 
+    if(currentuserid == id) {
+         return null;
+    }
     if (isLoading) {
         return <Button disabled>Loading...</Button>;
     }
@@ -36,7 +42,7 @@ export const FollowingButton: React.FC<FollowInfo> = ({ id, initialData }) => {
             className="bg-destructive"
             onClick={handleFollow}
         >
-            {!data?.isfollowbyUser ? "Unfollow" : "Follow"}
+            {data?.isfollowbyUser ? "Unfollow" : "Follow"}
         </Button>
     );
 };

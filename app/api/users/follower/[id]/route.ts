@@ -6,7 +6,9 @@ import {NextRequest,  NextResponse } from "next/server";
 export const GET = async (req : NextRequest , context : {params: Promise<{id : string}>}) => {
     const {id} = await context.params;
     const {user} = await validateRequest();
-
+    const {searchParams } = new URL(req.url);
+    const page =  parseInt(searchParams.get("page") || "0");
+    const pagesize = 10;
     if(!user) {
         return NextResponse.json({error: "Unauthorized"}, {status: 401});
     }

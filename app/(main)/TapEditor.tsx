@@ -42,81 +42,58 @@ export default  function  PostEditor () {
     
     const Mutation = useMutation({
         mutationFn: async (data: Postdata) => {
-            const response = await createPost({ content: data.content, userId : data.userId });
+            const response = await createPost({ content: data.content, userId: data.userId });
             return response?.result;
         },
-        onMutate: async (data: Postdata ) => {
-            const queryFilter: QueryFilters<InfiniteData<PostPage>> = { queryKey: ["todo-post", "post-for-you"] };
-            await queryClient.cancelQueries(queryFilter);
-            const previousData = queryClient.getQueriesData<InfiniteData<PostPage>>(queryFilter);
-
-         
-            queryClient.setQueriesData<InfiniteData<PostPage>>(queryFilter, (old) => {
-
-                const firstpage = old?.pages[0];
-
-                if (!firstpage) {
-
-                    return {
-
-                        pages: [{ posts: [data], nextCursor: null }],
-
-                        pageParams: []
-
-                    };
-
-                } else {
-
-                    const oldpages = [...old.pages];
-
-                    const newpost: Postdata = {
-
-                        ...data,
-
-                        createdAt: new Date()
-
-                    };
-
-                    oldpages[0] = {
-
-                        ...oldpages[0],
-
-                        posts: [newpost, ...oldpages[0].posts],
-
-                    };
-
-                    return {
-
-                        ...old,
-
-                        pages: oldpages
-
-                    };
-
-                }
-
-            });
-
+        onMutate: async (data: Postdata) => {
+            const queryKey = ["todo-post", "post-for-you"];
+            const previousData = queryClient.getQueryData<InfiniteData<PostPage>>(queryKey);
         
-
+            queryClient.setQueryData<InfiniteData<PostPage>>(queryKey, (old) => {
+                if (!old) {
+                    return {
+                        pages: [{ posts: [data], nextCursor: null }],
+                        pageParams: [],
+                    };
+                }
+        
+                const newpost: Postdata = {
+                    ...data,
+                    createdAt: new Date(),
+                };
+        
+                const updatedPages = [...old.pages];
+                updatedPages[0] = {
+                    ...updatedPages[0],
+                    posts: [newpost, ...updatedPages[0].posts],
+                };
+        
+                return {
+                    ...old,
+                    pages: updatedPages,
+                };
+            });
+        
             return { previousData };
-
-        },
-
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey : ["todo-post", "post-for-you"]});
+        }
+        ,
+        onSuccess: async() => {
             toast.success("Create post successfully");
+           
+            queryClient.invalidateQueries({queryKey: ["todo-post", "post-for-you"]});
         },
         onError: (err, newText, context) => {
             const queryFilter: QueryFilters = { queryKey: ["todo-post", "post-for-you"] };
             toast.error(err.message);
             queryClient.setQueriesData(queryFilter, context?.previousData);
         },
-        // onSettled: async (data) => {
-          
-        //     queryClient.invalidateQueries({queryKey : ["todo-post", "post-for-you"]});
-        // }
-    });
+        onSettled: async() => {
+            // Xóa onSettled hoặc để trống để tránh invalidate queries một lần nữa
+            const queryFilter: QueryFilters<InfiniteData<PostPage>> = { queryKey: ["todo-post", "post-for-you"] };
+            await queryClient.cancelQueries(queryFilter);
+            queryClient.invalidateQueries({queryKey: ["todo-post", "post-for-you"]});
+        }
+    }); 
 
     const onsubmit = () => {
         const text = GetText();
@@ -140,13 +117,22 @@ export default  function  PostEditor () {
     }
 
     return (
-        <div className="flex flex-col min-h-[10rem] w-full rounded-xl max-h-[20rem] overflow-auto shadow-sm">
-            <div className='bg-red-50 h-full flex-grow border-2 '>
-                <EditorContent editor={tiptap} className='w-full h-full p-6' />
-            </div>
-            <div className="self-end mt-3 flex-grow">
-                <Button onClick={onsubmit}>Post</Button>
-            </div>
+        <div className="flex flex-col w-full rounded-xl shadow-md overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+          
+          {/* Editor Section */}
+          <div className="flex-grow h-full max-h-[20rem] overflow-auto p-4 bg-red-50 dark:bg-gray-800 transition-colors duration-300">
+            <EditorContent
+              editor={tiptap}
+              className="w-full h-full focus:outline-none text-sm text-gray-800 dark:text-gray-100"
+            />
+          </div>
+      
+          {/* Action Section */}
+          <div className="flex justify-end p-4 border-t border-gray-200 dark:border-gray-700">
+            <Button onClick={onsubmit}>Post</Button>
+          </div>
+          
         </div>
-    );
+      );
+      
 }

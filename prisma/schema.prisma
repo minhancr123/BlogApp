@@ -14,6 +14,7 @@ model User {
   displayname String
   email       String?   @unique
   passwordHash String
+  avatarUrl   String? 
   googleId    String?   @unique
   createdAt   DateTime  @default(now())
   session     Session[]
