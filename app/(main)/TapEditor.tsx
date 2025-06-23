@@ -89,7 +89,7 @@ export default  function  PostEditor () {
         },
         onSettled: async() => {
             // Xóa onSettled hoặc để trống để tránh invalidate queries một lần nữa
-            const queryFilter: QueryFilters<InfiniteData<PostPage>> = { queryKey: ["todo-post", "post-for-you"] };
+            const queryFilter: QueryFilters = { queryKey: ["todo-post", "post-for-you"] };
             await queryClient.cancelQueries(queryFilter);
             queryClient.invalidateQueries({queryKey: ["todo-post", "post-for-you"]});
         }

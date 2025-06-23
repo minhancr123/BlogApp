@@ -4,30 +4,28 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
-) {
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   const { user } = await validateRequest();
-  const postId = context.params.id;
+  const { id: postId } = await params;
 
   try {
-    const PostValid = await prisma.post.findMany({
+    const postList = await prisma.post.findMany({
       where: {
         id: postId,
         userId: user?.id,
       },
     });
 
-    if (PostValid.length > 0) {
-      const post = await prisma.post.delete({
-        where: {
-          id: postId,
-        },
+    if (postList.length > 0) {
+      const deleted = await prisma.post.delete({
+        where: { id: postId },
       });
-      return NextResponse.json({ post, message: "Post Deleted Successfully" }, { status: 200 });
+      return NextResponse.json({ post: deleted, message: "Post Deleted" }, { status: 200 });
     } else {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-  } catch (error) {
-    return NextResponse.json({ message: error }, { status: 404 });
+  } catch (err) {
+    return NextResponse.json({ message: "Error", error: `${err}` }, { status: 500 });
   }
 }

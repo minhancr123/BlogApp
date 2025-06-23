@@ -125,7 +125,7 @@ export const Posts = ({ post }: PostProps) => {
     <>
   {/* Tabs */}
   <div className="flex text-black gap-2 w-full max-w-xl mx-auto mt-4">
-    {["foryou", "folowing"].map((tab) => (
+    {(["foryou", "folowing"] as const).map((tab) => (
       <div
         key={tab}
         className={`flex-1 rounded-lg border transition-all duration-200 text-center cursor-pointer ${
@@ -227,6 +227,5 @@ export const Posts = ({ post }: PostProps) => {
     </div>
   )}
 </>
-
   );
 };

@@ -32,7 +32,7 @@ export const UserTooltip = ({ children, user }: UserWithToolTip) => {
                 <div className="flex items-center max-w-80 flex-col gap-3 px-1 py-2 bg-gray-300 rounded-xl">
                     <div className="flex items-center justify-center p-2">
                         <Link href={`/users/${user.displayname}`}>
-                            <Avartar alt="" url="" size={35}></Avartar>
+                            <Avartar alt="" avatarUrl="" size={35}></Avartar>
                         </Link>
                         {user.displayname}
                     </div> 

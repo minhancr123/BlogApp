@@ -45,16 +45,16 @@ export const GET = async (req : NextRequest , context : {params: Promise<{id : s
     return NextResponse.json(data);
 }
 
-export const POST = async (req: NextRequest, context: { params: { id: string } }) => {
-    console.log("API called with params:", context?.params);
+export const POST = async (req: NextRequest, context: { params: Promise<{ id: string }> }) => {
+    // Await params first
+    const params = await context.params;
+    console.log("API called with params:", params);
 
     // Kiểm tra params
-    if (!context || !context.params || !context.params.id) {
-        console.error("Missing or invalid params:", context?.params);
+    if (!params || !params.id) {
+        console.error("Missing or invalid params:", params);
         return NextResponse.json({ error: "Missing target user ID" }, { status: 400 });
     }
-
-    const { params } = context;
 
     // Debug bước đầu tiên
     console.log("Starting POST handler for target ID:", params.id);
